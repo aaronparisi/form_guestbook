@@ -1,0 +1,46 @@
+# == Schema Information
+#
+# Table name: people
+#
+#  id               :integer          not null, primary key
+#  birthday         :date
+#  body_temperature :float
+#  can_send_email   :boolean
+#  country          :string
+#  description      :text
+#  email            :string
+#  extension        :string
+#  favorite_time    :time
+#  graduation_year  :integer
+#  name             :string
+#  price            :decimal(, )
+#  secret           :string
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#
+
+one:
+  name: MyString
+  secret: MyString
+  country: MyString
+  email: MyString
+  description: MyText
+  can_send_email: false
+  graduation_year: 1
+  body_temperature: 1.5
+  price: 9.99
+  birthday: 2020-08-05
+  favorite_time: 2020-08-05 12:40:04
+
+two:
+  name: MyString
+  secret: MyString
+  country: MyString
+  email: MyString
+  description: MyText
+  can_send_email: false
+  graduation_year: 1
+  body_temperature: 1.5
+  price: 9.99
+  birthday: 2020-08-05
+  favorite_time: 2020-08-05 12:40:04

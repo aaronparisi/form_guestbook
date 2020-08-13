@@ -1,0 +1,84 @@
+<%= form_with(model: person, local: true, html: {multipart: true}) do |form| %>
+  <% if person.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(person.errors.count, "error") %> prohibited this person from being saved:</h2>
+
+      <ul>
+      <% person.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div class="field">
+    <%= form.label :secret %>
+    <%= form.text_field :secret %>
+  </div>
+
+  <% nations = {
+    'United States of America' => 'USA',
+    'Canada' => 'Canada',
+    'Mexico' => 'Mexico',
+    'United Kingdom' => 'UK',
+    'China' => 'China'
+  } %>
+
+  <div class="field">
+    <%= gen_list_selector(:person, :country, nations) %>
+  </div>
+
+  <div class="field">
+    <%= form.label :email %>
+    <%= form.text_field :email %>
+  </div>
+
+  <div class="field">
+    <%= form.label :description %>
+    <%= form.text_area :description %>
+  </div>
+
+  <div class="field">
+    <%= form.label :can_send_email %>
+    <%= form.check_box :can_send_email %>
+  </div>
+
+  <div class="field">
+    <%= form.label :graduation_year %>
+    <%= form.number_field :graduation_year %>
+  </div>
+
+  <div class="field">
+    <%= form.label :body_temperature %>
+    <%= form.text_field :body_temperature %>
+  </div>
+
+  <div class="field">
+    <%= form.label :price %>
+    <%= form.text_field :price %>
+  </div>
+
+  <div class="field">
+    <%= form.label :birthday %>
+    <%= form.date_select :birthday, {start_year: 1800, end_year: 3000, max_years_allowed: 3000}%>
+  </div>
+
+  <div class="field">
+    <%= form.label :favorite_time %>
+    <%= form.time_select :favorite_time, minute_step: 15, ampm: true, include_blank: true %>
+  </div>
+
+  <div class="field">
+    <%= form.label :photo %><br>
+    <%= form.file_field :photo %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

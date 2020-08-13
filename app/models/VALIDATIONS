@@ -1,0 +1,112 @@
+VALIDATIONS
+
+1. How would you check to make sure a given field is present?
+=> validates_presence_of :given_field
+
+2. How would you restrict the length of a given field?
+=> validates_length_of :given_field......... (various options)
+
+3. How would you validate the format of a given field?
+=> validates_format_of :given_field, with: /REGEX/
+
+4. How would you validate that a given field's value is one of a limited group of options?
+=> validates_inclusion_of :gf, in: ["these", "are", "the", "only", "options"] (or, alternatively, validates_exclusion_of)
+
+5. How would you ensure that a field's value does not match any other row in the db?
+=> validates_uniqueness_of
+
+6. How can you add additional constraints to uniqueness (eg. "can't repeat email WHEN USERNAME AND PASSWORD ALSO MATCH?")
+=> validates_uniqueness_of :gf, scope: [:username, :password]
+
+7. How can you ensure that a validation will only be performed under certain conditions?
+=> validates_length_of :gf, if: some_custom_helper_method?, message: "if some_custom_helper_method is true, you need a :gf"
+
+8. How can you write custom validations?
+=> validates :my_custom_validation_method
+=> def my_custom_validation_method
+=>  # in here I might check several conditions with different error messages
+=>  # if I say self.errors.add("an error"), the save will fail because there is an error
+=> end
+=> this basically says "hey, call this helper method when you're doing validations"
+
+9. What are some things you can do with custom validations?
+=> custom error messages
+
+10. How can you add a custom message to a validation?
+=> you can use the ..., message: "a message" option in the validation
+
+FILE STORAGE
+
+1. What did we add to our form in order to select a file element?
+=> there is simply another div, just like the others, but the variable name is :photo
+
+2. In order to store a photo, we added an "extension" column (eg. ".jpg" ".pdf") to the people table in the db
+   Why did we do this, and where did we store the actual photo data?
+=> photo data would take up a lot of room, so we simply store the extension in the database
+=> we access the extension from a variable 'file_data' (which I think comes in b/c the form we added is .file_field)
+=> and we simply split the string on the '.' and grab the last piece
+=> The actual photo data gets stored locally in a folder called app/public/photo_store (more on that below)
+
+3. ActiveRecord(?) uses the params hash to update the database; however, there is no :extension key in the :person hash.
+   How, then, does :extension get saved in the database?
+=> When we hit submit, we send a bunch of params to the controller.  One of them, ofc, is :person
+=> which is a hash of person params, like :name, :secret, etc.
+=> when the controller is trying to save/update(?) a person, it will call things like person.name= and person.secret=
+=> Now, like we used to do for custom array methods []=, we wrote a method called photo=(file_data)
+=> which basically hijacks what would otherwise try to populate a (non-existen) photo column in the db
+=> so that it instead sets self.extension
+=> NOTE: we do not validates_presence_of :extension, because we are allowing the user to not upload a photo
+
+4. When the user hits submit, which controller action is called?
+=> people_controller#create or #update
+
+5. Does this controller action save a photo?
+=> No, it will end up saving an extension
+
+6. If so, where?
+
+7. If not, how does the photo get saved?
+=> in the person.rb model, there is a line 'after_save :save_photo' which will take care of saving the actual photo data
+
+8. We defined a number of helper methods and a constant.  For each, discuss:
+  a) What the method does
+  b) Why we created it
+  c) Where it gets called
+
+PHOTO_STORE
+=> this constant is a string which represents a path to the app/public/photo_store directory
+=> it utilizes Rails.root, which I think just points to the app directory?
+=> it is called in photo_filename and store_photo, it's just a constant to keep it DRY
+
+photo_filename
+=> this helper method constructs the filename with File.join PHOTO_STORE, "#{id}.#{extension}"
+=> notice that we use the absolute path
+=> and that we save the photo based off of the id of the user, not the jumble of info that comes in file_data
+=> also, note that we have access to the id and extension attributes because this will only get called after_save
+=> this is called when we are saving the photo, like "hey, I need a filename, here it is"
+
+photo_path
+=> this is a STRING representing the relative path of the user's photo
+=> this is utilized in the VIEW (image_tag @person.photo_path)
+=> the differences between photo_filename and photo_path are:
+=> _filename includes PHOTO_STORE, which includes Rails.root and /public/
+=> whereas _path just has /photo_store/1.jpg
+=> this is because to SAVE the photo, we want the absolute path (why??)
+=> but to access the photo in html, we do not need the absolute path
+
+has_photo?
+=> we want to give the view some options; if they user has_photo?, show it, else, "no photo"
+
+store_photo
+=> this is the method that gets called after_save
+=> first it checks if @file_data is a variable (remember, in photo=, we either set @file_data = file_data, or we skipped it altogether)
+=> then we create the directory app/public/photo_store with File.makedir_p PHOTO_STORE (this does nothing if the directory exists already)
+=> then we open a file named photo_filename in 'wb' mode
+=> we write the file_data to this new file with f.write(@file_data.read)
+=> lastly we set @file_data = nil, so that we don't duplicate saving?
+=> (I'm not sure WHEN that would happen, it's not like this is an until loop)
+
+ONE OTHER NOTE:
+when submitting forms, we have to specify that it's a multimedia form
+we do this by adding multipart: true as an html {} option in the form_with builder
+I think this has to do with how the http request is sent, it stores the data in sevaral parts
